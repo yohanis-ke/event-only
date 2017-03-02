@@ -66,11 +66,11 @@ The database already has some locations and events in it since you ran `rake db:
 ```html
 <h1>EventOnly</h1>
 
-<% @locations.each do |location| %>
+<% @locations.each do |current_location| %>
   <div class="location">
-    <h3>City: <%= location.city %></h3>
-    <%= location.description %><br />
-    <%= link_to image_tag(location.image, class: "location"), location %>
+    <h3>City: <%= current_location.city %></h3>
+    <%= current_location.description %><br />
+    <%= link_to image_tag(current_location.image, class: "location"), location %>
   </div>
 <% end %>
 ```
@@ -95,7 +95,7 @@ Clicking an image on the index page should now take you to the show page for a s
 
 You might have noticed that we wrote code that was almost identical in both files (everything inside of the `<div>` tag). This should always be a sign that you should find a way to re-factor your code such that the duplicated code is kept in one place.
 
-The code we duplicated had one job in both places: to display a location. Therefore, let's create a new view: `views/locations/_location.html.erb`.
+The code we duplicated had one job in both places: to display a location. Therefore, let's create a new view: `views/locations/_single_location.html.erb`.
 
 ```html
 <div class="location">
@@ -105,9 +105,13 @@ The code we duplicated had one job in both places: to display a location. Theref
 </div>
 ```
 
-The entire purpose of this view is to render a piece of a webpage, and to do so potentially many times. For this reason it is called a [partial](http://guides.rubyonrails.org/layouts_and_rendering.html#using-partials) view. We indicate this by having an underscore at the start of the file name (`_location.html.erb`).
+The entire purpose of this view is to render a piece of a webpage, and to do so potentially many times. For this reason it is called a [partial](http://guides.rubyonrails.org/layouts_and_rendering.html#using-partials) view. We indicate this by having an underscore at the start of the file name (`_single_location.html.erb`).
 
-Also notice that, in our partial, `location` is a local variable, not an instance variable. This is because the partial's job is to render whatever we give it, and we won't always have an instance variable called `@location`. To see why, look again at our code for `index.html.erb` and notice that, because we are iterating over `@locations`, we are using a local variable called `location`. We will now `render` this partial, and pass it the local variable `location`.
+Also notice that, in our partial, `location` is a local variable, not an instance variable. This is because the partial's job is to render whatever we give it, and we won't always have an instance variable called `@location`.
+
+>You'd be less likely to see a partial named `_single_location.html.erb` in the real world. It would more likely be called `_location.html.erb`. We're doing this for clarity, so stick with it for now.
+
+To see why, look again at our code for `index.html.erb` and notice that, because we are iterating over `@locations`, we are using a local variable called `current_location`. We will now `render` this partial, and pass it whatever location object we have access to - `current_location` in `index.html.erb`, and `@location` in `show.html.erb`.
 
 Let's edit `views/locations/index.html.erb` now:
 
@@ -118,8 +122,8 @@ Let's edit `views/locations/index.html.erb` now:
   <%= link_to 'New Location', new_location_path %>
 </p>
 
-<% @locations.each do |location| %>
-  <%= render 'location', location: location %>
+<% @locations.each do |current_location| %>
+  <%= render 'single_location', location: current_location %>
 <% end %>
 ```
 
@@ -128,38 +132,27 @@ And edit `views/locations/show.html.erb`:
 ```html
 <h1><%= @location.name %></h1>
 
-<%= render 'location', location: @location %>
+<%= render 'single_location', location: @location %>
 ```
 
-Both files are now much shorter because we're using our `_location` partial to do the actual work of deciding how a location object should look on our web page. Now we can use this code to render a location anywhere!
+Both files are now much shorter because we're using our `_single_location` partial to do the actual work of deciding how a location object should look on our web page. Now we can use this code to render a location anywhere!
 
 Let's take a closer look at the syntax for rendering a partial. `render` is a method that takes arguments. The first argument is the name of the partial we want to render, leaving out the leading underscore. That is:
 
-`<%= render 'location' %>` or `<%= render('location') %>`
+`<%= render 'single_location' %>` or `<%= render('single_location') %>`
 
-But this code is not sufficient to give the partial the location object that it needs. We therefore pass in the location object, whatever its name happens to be. We are using the name `location` in the partial, so we had better give it the same name when passing it. This is the left-hand side (the key) of the hash we are passing. The right-hand side (the value) is the location object itself. That is, in the `show.html.erb` file:
+But this code is not sufficient to give the partial the location object that it needs. Check your code in `_single_location.html.erb`: it relies on a variable called `location`, and it doesn't appear to be set anywhere!
 
-`<%= render 'location', location: @location %>`
+We therefore have to pass it a location object, whatever its name happens to be. We are using the name `location` in the partial, so we had better give it the same name when passing it. This is the left-hand side (the key) of the hash we are passing. The right-hand side (the value) is the location object itself. That is, in the `show.html.erb` file:
+
+    <%= render 'single_location', location: @location %>
+
+and in the `index.html.erb` file:
+
+    `<%= render 'single_location', location: current_location %>
 
 Visit both pages again in the browser to make sure that they are still working as before.
 
-This works wonderfully, but we can still do better. Rails is smart and knows that if we call `render` and pass it a `Location` object, we want it to render the `_location` partial. Moreover, it knows that our variable in the partial is supposed to be named `location`. We can now edit the `show` page again:
-
-```html
-<h1><%= @location.name %></h1>
-
-<%= render @location %>
-```
-
-Rails also knows that if we ask it to render a collection of Location objects, it should iterate over that collection and call render on each object. Therefore, We can now also edit the `index` page again as well:
-
-```html
-<h1>EventOnly</h1>
-
-<%= render @locations %>
-```
-
-Visit both pages again in the browser and you should see exactly the same output as before. Commit your changes and let's move on to forms!
 
 ### Forms - Location
 
@@ -208,11 +201,13 @@ A link should now appear on <http://localhost:3000/locations>, but it should lea
 
 The fields `name`, `city`, `description`, and `image` already exist in our database schema (`db/schema.rb`). Reload your `new` page and we should see a working form! Try it out. Make sure you enter a real image URL so we can see it on our other pages.
 
-We now need to create a page to edit existing `Location` objects. We're going to need another form. What fields will the form need? It's actually going to need exactly the same fields that we have on the new page's form. This should raise an immediate flag in your head! Because our two forms are going to be identical, let's save the work by putting the form in one place – a partial.
+We now need to create a page to edit existing `Location` objects. We're going to need another form. What fields will the form need? It's actually going to need exactly the same fields that we needed to create a new Location. Because of that, our forms are going to be the same! This should raise an immediate flag in your head - Don't Repeat Yourself (DRY). Because our two forms are going to be identical, let's save the work by putting the form in one place – a partial.
 
-Make a new partial view at `views/locations/_form.html.erb`, and move the entire form over to that file, removing the `@` before `location`, ie:
+Make a new partial view at `views/locations/_location_form.html.erb`, and move the entire form over to that file, removing the `@` before `location`, ie:
 
-`<%= form_for location do |f| %>`
+    <%= form_for location do |f| %>
+
+    ...
 
 Now we can shorten our `new.html.erb` view so it looks like this:
 
@@ -221,7 +216,7 @@ Now we can shorten our `new.html.erb` view so it looks like this:
 
 <%= link_to 'Show all locations', locations_path %>
 
-<%= render 'form', location: @location %>
+<%= render 'location_form', location: @location %>
 ```
 
 Reload your `new` page and make sure the form still works.
@@ -233,7 +228,7 @@ Now we can make the `edit` page quite easily! Let's first add a link to it on th
 Now edit the `edit.html.erb` view:
 
 ```html
-<h1>Edit <%= link_to @location.name, @location %></h1>
+<h1>Edit <%= link_to @location.name, location_path(@location) %></h1>
 
 <%= render 'form', location: @location %>
 ```
@@ -244,15 +239,15 @@ We can now Create, Read, and Update `Locations`. We're just missing the D in CRU
 
 ```html
 <h1><%= @location.name %></h1>
-<%= link_to 'Edit', edit_location_path %>
-| <%= link_to 'Delete', location_path, method: :delete, data: {confirm: "Are you sure you want to delete the location '#{@location.name}'? This cannot be undone!"} %>
+<%= link_to 'Edit', edit_location_path(@location) %>
+| <%= link_to 'Delete', location_path(@location), method: :delete, data: {confirm: "Are you sure you want to delete the location '#{@location.name}'? This cannot be undone!"} %>
 
-<%= render @location %>
+<%= render 'single_location', location: @location %>
 ```
 
 Reload the show page and try deleting the `Location` you just made. If it works, you've just successfully built the CRUD operations for the `Location` model using partial views.
 
-Now is a good time to commit your work thus far.
+If you haven't yet committed your work, make sure you do so now!
 
 ### Views and Forms - Event
 
