@@ -227,7 +227,7 @@ Now we can make the `edit` page quite easily! Let's first add a link to it on th
 Now edit the `edit.html.erb` view:
 
 ```html
-<h1>Edit <%= link_to @location.name, location_path(@location) %></h1>
+<h1>Editing <%= link_to @location.name, location_path(@location) %></h1>
 
 <%= render 'location_form', location: @location %>
 ```
@@ -251,67 +251,38 @@ If you haven't yet committed your work, make sure you do so now!
 
 ### Views and Forms - Event
 
-In this application, each `Location` can have many `Events`. The `Event` model already exists; now you have to build the CRUD operations for it, just like we did before. *Read this whole section before getting started* - there is information at the bottom that is quite useful.
+In this application, the `Event` model already exists; now you have to build the CRUD operations for it, just like we did before.
 
-To help you get started, let's add a link somewhere in the location `show` page to make a new event, as well as to go to the events page for that `Location`:
-
-```html
-<h3><%= link_to 'New Event', new_location_event_path(@location) %></h3>
-
-<h2><%= link_to 'Events', location_events_path(@location) %></h2>
-```
-
-In this app, `Event` is a nested resource under `Location`. That means we access events as follows. The below example should, if we create the views correctly, show us all of the `Events` that belong to the `Location` with id 1.
-
-<http://localhost:3000/locations/1/events>
-
-Similar to above, the below example is the URL to create an `Event` that belongs to the 3rd `Location`:
-
-<http://localhost:3000/locations/3/events/new>
-
-Or show a specific event:
-
-<http://localhost:3000/locations/1/events/5>
-
-Or edit a specific event:
-
-<http://localhost:3000/locations/1/events/2/edit>
+Try the following workflow:
+  1. No copy and pasting from the Locations examples!
+  1. Avoid referring to the examples until you've thought through each problem.
+  1. Believe in yourself and follow your dreams!
 
 #### Your tasks:
-1. Display all the events that belong to a location.
+1. Display all the events.
   * `views/events/index.html.erb`
-  * you will have access to the `@events` and `@location` instance variables
+  * you will have access to the `@events` instance variable
 1. Create a view to display a specific event.
   * `views/events/show.html.erb`
-  * you will have access to the `@event` and `@location` instance variables
+  * you will have access to the `@event` instance variable
 1. Create a new event.
   * `views/events/new.html.erb`
-  * you will have access to the `@event` and `@location` instance variables
+  * you will have access to the `@event` instance variable
 1. Edit an event.
   * `views/events/edit.html.erb`
-  * you will have access to the `@event` and `@location` instance variables
+  * you will have access to the `@event` instance variable
 1. Delete an event.
   * `views/events/show.html.erb`
 
-Remember that you should be using partial views whenever you have duplicated code!
+Remember that you should be using partial views whenever you have duplicated code in your views!
 
-Because `Event` is nested under `Location`, the form for Events must reflect this nesting as follows:
+Make sure to add links to each page so that events are fully navigable.
 
-```html
-<!-- we have access to @location throughout our Event views, and we passed in the event object -->
-<%= form_for [@location, event] do |f| %>
-  <!-- Form fields go here -->
-  <!-- Look in the schema.rb file to see the fields in the events table -->
-<% end %>
-```
-
-This also applies to anywhere we want to link to a nested resource - in this case, an Event. Assuming we have access to variables `location` and `event`:
-
-```html
-<%= link_to "Event link text", [location, event] %>
-```
-
-## Stretch Assignment
+## Stretch Exercises
 
 1. Modify the `views/home/index.html.erb` view to display every Location and every Event.
-1. Display all the events for a specific location on that location's `show` page.
+1. Allow each Location to be edited on the Locations `index` page by adding forms.
+  * Hint: think partials!
+1. The Locations show page displays the name of the Location twice, but we need it to display the name of each Location on the `index` page. Therefore:
+  * How can we modify the partial so that it only shows the name of the Location *conditionally*? That is, only when we want it to?
+  * What do we have to pass to the partial to make that work?
