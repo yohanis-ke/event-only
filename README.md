@@ -64,13 +64,14 @@ Each of these models has a set of CRUD (Create, Read, Update, Delete) database o
 The database already has some locations and events in it since you ran `rake db:seed`. Let's create an index page to view them. Do this by modifying the `views/locations/index.html.erb` file.
 
 ```html
-<h1>EventOnly</h1>
+<h1>Locations</h1>
 
 <% @locations.each do |current_location| %>
   <div class="location">
-    <h3>City: <%= current_location.city %></h3>
+    <h3><%= current_location.name %></h3>
+    <h4>City: <%= current_location.city %></h4>
     <%= current_location.description %><br />
-    <%= link_to image_tag(current_location.image, class: "location"), location %>
+    <%= link_to image_tag(current_location.image, class: "location"), location_path(current_location) %>
   </div>
 <% end %>
 ```
@@ -85,10 +86,12 @@ Let's create a page that shows off a specific location. Edit the `views/location
 <h1><%= @location.name %></h1>
 
 <div class="location">
-  <h3>City: <%= @location.city %></h3>
+  <h3><%= @location.name %></h3>
+  <strong>City: <%= @location.city %></strong><br />
   <%= @location.description %><br />
-  <%= link_to image_tag(@location.image, class: "location"), @location %>
+  <%= link_to image_tag(@location.image, class: "location"), location_path(@location) %>
 </div>
+
 ```
 
 Clicking an image on the index page should now take you to the show page for a specific location.
@@ -107,7 +110,7 @@ The code we duplicated had one job in both places: to display a location. Theref
 
 The entire purpose of this view is to render a piece of a webpage, and to do so potentially many times. For this reason it is called a [partial](http://guides.rubyonrails.org/layouts_and_rendering.html#using-partials) view. We indicate this by having an underscore at the start of the file name (`_single_location.html.erb`).
 
-Also notice that, in our partial, `location` is a local variable, not an instance variable. This is because the partial's job is to render whatever we give it, and we won't always have an instance variable called `@location`.
+Also notice that, in our partial, `location` is a local variable, not an instance variable. This is because the partial's job is to render whatever we give it, and we won't always have an instance variable called `@location`. We could have called it anything.
 
 >You'd be less likely to see a partial named `_single_location.html.erb` in the real world. It would more likely be called `_location.html.erb`. We're doing this for clarity, so stick with it for now.
 
@@ -117,10 +120,6 @@ Let's edit `views/locations/index.html.erb` now:
 
 ```html
 <h1>EventOnly</h1>
-
-<p>
-  <%= link_to 'New Location', new_location_path %>
-</p>
 
 <% @locations.each do |current_location| %>
   <%= render 'single_location', location: current_location %>
@@ -156,7 +155,7 @@ Visit both pages again in the browser to make sure that they are still working a
 
 ### Forms - Location
 
-We can now view all of the Locations that exist in the database, but what about creating new ones? We first need to get to the new page. Add the following code somewhere in the `index.html.erb` file as follows:
+We can now view all of the Locations that exist in the database, but what about creating new ones? We first need to get to the new page. Add the following code anywhere in the `index.html.erb` file as follows:
 
 ```html
 <p>
@@ -230,19 +229,20 @@ Now edit the `edit.html.erb` view:
 ```html
 <h1>Edit <%= link_to @location.name, location_path(@location) %></h1>
 
-<%= render 'form', location: @location %>
+<%= render 'location_form', location: @location %>
 ```
 
-Try editing the `Location` you made earlier.
+Try editing the `Location` you made earlier. Notice how it has already populated the data for you. That's the power of `form_for` (and has nothing to do with using partials).
 
 We can now Create, Read, and Update `Locations`. We're just missing the D in CRUD: Delete! Add the following delete link to the `show` page as well. It will confirm with the user before sending a `DELETE` request to the server. The view should look something like this:
 
 ```html
-<h1><%= @location.name %></h1>
+...
+
 <%= link_to 'Edit', edit_location_path(@location) %>
 | <%= link_to 'Delete', location_path(@location), method: :delete, data: {confirm: "Are you sure you want to delete the location '#{@location.name}'? This cannot be undone!"} %>
 
-<%= render 'single_location', location: @location %>
+...
 ```
 
 Reload the show page and try deleting the `Location` you just made. If it works, you've just successfully built the CRUD operations for the `Location` model using partial views.
