@@ -18,7 +18,11 @@ class EventsController < ApplicationController
 
   def update
     @event = Event.find(params[:id])
-    if @event.update(event_params)
+    @event.name = params[:event][:name]
+    @event.date = params[:event][:date]
+    @event.capacity = params[:event][:capacity]
+
+    if @event.save
       redirect_to [@location, @event]
     else
       redirect_back_or_to [@location, @event]
@@ -30,7 +34,10 @@ class EventsController < ApplicationController
   end
 
   def create
-    @event = Event.new(event_params)
+    @event = Event.new
+    @event.name = params[:event][:name]
+    @event.date = params[:event][:date]
+    @event.capacity = params[:event][:capacity]
     @event.location = @location
 
     if @event.save
@@ -52,7 +59,4 @@ class EventsController < ApplicationController
     end
   end
 
-  def event_params
-    params.require(:event).permit(:name, :date, :capacity)
-  end
 end
