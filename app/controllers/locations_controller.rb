@@ -14,10 +14,16 @@ class LocationsController < ApplicationController
 
   def update
     @location = Location.find(params[:id])
-    if @location.update(location_params)
+
+    @location.name = params[:location][:name]
+    @location.city = params[:location][:city]
+    @location.description = params[:location][:description]
+    @location.image = params[:location][:image]
+
+    if @location.save
       redirect_to @location
     else
-      redirect_back_or_to @location
+      redirect_to @location
     end
   end
 
@@ -26,7 +32,11 @@ class LocationsController < ApplicationController
   end
 
   def create
-    @location = Location.new(location_params)
+    @location = Location.new
+    @location.name = params[:location][:name]
+    @location.city = params[:location][:city]
+    @location.description = params[:location][:description]
+    @location.image = params[:location][:image]
 
     if @location.save
       redirect_to locations_path
@@ -41,7 +51,4 @@ class LocationsController < ApplicationController
     redirect_to locations_path
   end
 
-  def location_params
-    params.require(:location).permit(:name, :city, :description, :image)
-  end
 end

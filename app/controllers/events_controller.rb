@@ -25,7 +25,7 @@ class EventsController < ApplicationController
     if @event.save
       redirect_to [@location, @event]
     else
-      redirect_back_or_to [@location, @event]
+      redirect_to [@location, @event]
     end
   end
 
