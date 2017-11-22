@@ -31,7 +31,6 @@ Location.create(
 
   Event.create(
     name: FFaker::Sport.name,
-    location: Location.all.sample,
     date: ((rand + 0.5) * 20).days.ago,
   )
 

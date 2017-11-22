@@ -1,15 +1,10 @@
 class EventsController < ApplicationController
-  before_action do
-    @location = Location.find(params[:location_id])
-  end
-
   def index
-    @events = @location.events
+    @events = Event.all
   end
 
   def show
     @event = Event.find(params[:id])
-    ensure_location_match
   end
 
   def edit
@@ -23,9 +18,9 @@ class EventsController < ApplicationController
     @event.capacity = params[:event][:capacity]
 
     if @event.save
-      redirect_to [@location, @event]
+      redirect_to event_url(@event)
     else
-      redirect_to [@location, @event]
+      redirect_to event_url(@event)
     end
   end
 
@@ -41,22 +36,16 @@ class EventsController < ApplicationController
     @event.location = @location
 
     if @event.save
-      redirect_to [@location, @event]
+      redirect_to events_url
     else
-      redirect_to new_location_event_path
+      redirect_to new_event_url
     end
   end
 
   def destroy
     @event = Event.find(params[:id])
     @event.destroy
-    redirect_to location_events_path
-  end
-
-  def ensure_location_match
-    if @event.location != @location
-      not_found
-    end
+    redirect_to events_path
   end
 
 end

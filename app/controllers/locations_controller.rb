@@ -5,7 +5,6 @@ class LocationsController < ApplicationController
 
   def show
     @location = Location.find(params[:id])
-    @events = @location.events
   end
 
   def edit
@@ -21,9 +20,9 @@ class LocationsController < ApplicationController
     @location.image = params[:location][:image]
 
     if @location.save
-      redirect_to @location
+      redirect_to location_url(@location)
     else
-      redirect_to @location
+      redirect_to location_url(@location)
     end
   end
 
