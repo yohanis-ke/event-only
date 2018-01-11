@@ -32,6 +32,8 @@ Location.create(
   Event.create(
     name: FFaker::Sport.name,
     date: ((rand + 0.5) * 20).days.ago,
+    capacity: ((rand*100) + 1).to_i,
+    city: Location.all.sample.city
   )
 
 end

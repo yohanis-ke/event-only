@@ -16,8 +16,8 @@ class EventsController < ApplicationController
     @event.name = params[:event][:name]
     @event.date = params[:event][:date]
     @event.capacity = params[:event][:capacity]
-    @event.location = params[:event][:city]
-    
+    @event.city = params[:event][:city]
+
     if @event.save
       redirect_to event_url(@event)
     else
@@ -34,7 +34,7 @@ class EventsController < ApplicationController
     @event.name = params[:event][:name]
     @event.date = params[:event][:date]
     @event.capacity = params[:event][:capacity]
-    @event.location = params[:event][:city]
+    @event.city = params[:event][:city]
 
     if @event.save
       redirect_to events_url
