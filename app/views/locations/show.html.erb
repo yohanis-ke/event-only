@@ -1,1 +1,18 @@
-locations#show page
+
+
+<h1><%= @location.name %></h1>
+
+<%= render 'single_location', location: @location %>
+<%= link_to 'Edit', edit_location_path %>
+
+<%= link_to 'Edit', edit_location_path(@location) %>
+<%= link_to 'Delete', location_path(@location), method: :delete, data: {confirm: "Are you sure you want to delete the location '#{@location.name}'? This cannot be undone!"} %>
+
+
+<!--
+<div class="location">
+  <h3><%= @location.name %></h3>
+  <h4>City: <%= @location.city %></h4>
+  <%= @location.description %><br />
+  <%= link_to image_tag(@location.image, class: "location"), location_path(@location) %>
+</div -->
